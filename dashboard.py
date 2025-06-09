@@ -1,82 +1,40 @@
 import pandas as pd
-import dash 
-from dash import Dash,dcc,html
-from dash.dependencies import Input, Output
+import streamlit as st
 import plotly.express as px
-import plotly.graph_objects as go
 
-app = Dash(__name__)
-external_stylesheets = ["https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"]
-app = Dash(__name__, external_stylesheets=external_stylesheets,)
+# ============== LOAD DATA =================
+df = pd.read_csv("DataHabitAcadamicPerm .csv")
 
-################### DATASET ####################################
-df=pd.read_csv("DataHabitAcadamicPerm .csv")
+# ============== SETUP STREAMLIT APP =================
+st.set_page_config(page_title="Student Habit Dashboard", layout="wide")
+st.title("📊 Student Habit & Academic Dashboard")
 
-#################### CHARTS #####################################
-def tab1_layout():
-    return html.Div([dcc.Graph(id='graph1')])
+# ============== TABS =====================
+tab1, tab2, tab3 = st.tabs(["📚 Study vs Exam Score", "📱 Social Media vs Mental Health", "😴 Sleep vs Attendance"])
 
-def tab2_layout():
-    return html.Div([dcc.Graph(id='graph2')])
+# ============== TAB 1 =====================
+with tab1:
+    st.subheader("Study Hours vs Exam Score")
+    fig1 = px.scatter(df, x='study_hours_per_day', y='exam_score',
+                      color='gender', trendline='ols',
+                      color_discrete_sequence=['#FF6361', '#58508D'],
+                      title='Study Hours vs Exam Score')
+    st.plotly_chart(fig1, use_container_width=True)
 
-def tab3_layout():
-    return html.Div([dcc.Graph(id='graph3')])
+# ============== TAB 2 =====================
+with tab2:
+    st.subheader("Social Media vs Mental Health")
+    fig2 = px.scatter(df, x='social_media_hours', y='mental_health_rating',
+                      color='part_time_job', trendline='ols',
+                      color_discrete_sequence=['#2ca02c', '#d62728'],
+                      title='Social Media vs Mental Health')
+    st.plotly_chart(fig2, use_container_width=True)
 
-##################### APP LAYOUT ####################################
-app.layout = html.Div([
-        html.H1("Student Habit & Academic Dasboard", style={'textAlign':'Center'}),
-        dcc.Tabs(id='tabs',value='tab1',
-                children=[
-                dcc.Tab(label='Study vs Exam Score',value='tab1'),
-                dcc.Tab(label='Social Media vs Mental Health',value='tab2'),
-                dcc.Tab(label='Sleep vs Attendance',value='tab3')
-        ]),
-             html.Div(id='tab-content')
-        ])
-
-##################### CALLBACKS ####################################
-@app.callback(
-    Output('tab-content', 'children'),
-    Input('tabs', 'value')
-)
-def render_content(tab):
-    if tab=='tab1':
-        return tab1_layout()
-    elif tab=='tab2':
-        return tab2_layout()
-    elif tab=='tab3':
-        return tab3_layout()
-
-@app.callback(
-    Output('graph1', 'figure'),
-    Input('tabs', 'value')
-)
-def update_graph1(tab):
-    if tab=='tab1':
-        return px.scatter(df, x='study_hours_per_day', y='exam_score',
-                color='gender', trendline='ols',
-                color_discrete_sequence=['#FF6361', '#58508D'],        
-                title='Study Hours vs Exam Score')
-
-@app.callback(
-    Output('graph2', 'figure'),
-    Input('tabs', 'value')
-)
-def update_graph2(tab):
-   if tab=='tab2':
-        return px.scatter(df, x='social_media_hours', y='mental_health_rating',
-                     color='part_time_job', trendline='ols',color_discrete_sequence=['#2ca02c', '#d62728'],
-                     title='Social Media vs Mental Health')
-       
-@app.callback(
-    Output('graph3', 'figure'),
-    Input('tabs', 'value')
-)
-def update_graph3(tab):
-    if tab=='tab3':
-        return px.scatter(df, x='sleep_hours', y='attendance_percentage',
-                     color='diet_quality', trendline='ols',color_discrete_sequence=['#17becf', '#bcbd22', '#ff7f0e'],
-                     title='Sleep Hours vs Attendance')
-   
-if __name__ == '__main__':
-    app.run_server(debug=True, use_reloader=False)
+# ============== TAB 3 =====================
+with tab3:
+    st.subheader("Sleep Hours vs Attendance")
+    fig3 = px.scatter(df, x='sleep_hours', y='attendance_percentage',
+                      color='diet_quality', trendline='ols',
+                      color_discrete_sequence=['#17becf', '#bcbd22', '#ff7f0e'],
+                      title='Sleep Hours vs Attendance')
+    st.plotly_chart(fig3, use_container_width=True)
